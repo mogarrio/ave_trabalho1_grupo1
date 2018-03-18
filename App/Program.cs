@@ -18,12 +18,20 @@ namespace App
             SqlConnection con = new SqlConnection(connStr);
             try
             {
+                /*
                 SqlCommand cmd = con.CreateCommand();
                 cmd.CommandText = "SELECT ProductID, ProductName FROM Products";
                 con.Open();
                 SqlDataReader dr = cmd.ExecuteReader();
                 while (dr.Read())
-                    Console.WriteLine(dr["ProductName"]);
+                    Console.WriteLine(dr["ProductName"]);*/
+
+                SqlCommand cmd2 = con.CreateCommand();
+                cmd2.CommandText = "SELECT RegionID, RegionDescription FROM Region";
+                con.Open();
+                SqlDataReader dr2 = cmd2.ExecuteReader();
+                while (dr2.Read())
+                    Console.WriteLine(dr2["RegionID"] + ", " + dr2["RegionDescription"] + "-----");
             }
             finally
             {

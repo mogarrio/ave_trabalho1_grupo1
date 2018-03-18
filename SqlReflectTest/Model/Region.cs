@@ -3,7 +3,7 @@
 namespace SqlReflectTest.Model
 {
     [Table("Region")]
-    public struct Regions
+    public struct Region
     {
         [PK]
         public int RegionID { get; set; }
