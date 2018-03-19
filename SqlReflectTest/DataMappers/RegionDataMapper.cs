@@ -12,7 +12,7 @@ namespace SqlReflectTest.DataMappers
         const string SQL_GET_BY_ID = SQL_GET_ALL + " WHERE RegionID=";
         const string SQL_INSERT = "INSERT INTO Region (" + COLUMNS + ") OUTPUT INSERTED.RegionID VALUES ";
         const string SQL_DELETE = "DELETE FROM Region WHERE RegionID = ";
-        const string SQL_UPDATE = "UPDATE Region SET RegionDescription={1}, WHERE RegionID = {0}";
+        const string SQL_UPDATE = "UPDATE Region SET RegionDescription={1} WHERE RegionID = {0}";
         
 
         public RegionDataMapper(string connStr) : base(connStr) ///TODO duvida, porque é contrutor não tem nada implementado?

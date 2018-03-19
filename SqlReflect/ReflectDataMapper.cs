@@ -28,7 +28,10 @@ namespace SqlReflect
 
             var memberInfo = klass.GetField("State");
 
-            TableAttribute att = klass.GetCustomAttribute(TableAttribute, false);//TODO sintaxe errada? devolve a+enas 1 atributo?
+            SqlReflect.Attributes.TableAttribute tableAttribute = new TableAttribute("Table");
+            Type type = tableAttribute.GetType();
+
+            TableAttribute att = (TableAttribute)klass.GetCustomAttribute(typeof(TableAttribute), false);//TODO sintaxe errada? devolve a+enas 1 atributo?
             
             
             
@@ -61,6 +64,7 @@ namespace SqlReflect
                 object[] paramArray = (object[])Array.CreateInstance(pType, 1);
                 paramArray[0] = setParam;
                 pSet.Invoke(item, paramArray);//TODO existe uma maneira de fazer isto enviando apenas 1 parametro
+                pSet.Invoke(item, new object[1] { setParam });
             }
             return item;
         }
