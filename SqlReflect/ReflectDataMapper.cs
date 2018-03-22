@@ -10,13 +10,17 @@ namespace SqlReflect
     public class ReflectDataMapper : AbstractDataMapper
     {
         private Type klass;
+        private string tableName;
 
-        private string COLUMNN;
-        private string SQL_GET_BY_ID;
-        private string SQL_INSERT;
-        private string SQL_DELETE;
-        private string SQL_UPDATE;
         private string ID;
+        private string COLUMNN;
+        const string C_SQL_GET_ALL = "SELECT {0}, {1} FROM {2} ";
+        const string C_SQL_GET_BY_ID = C_SQL_GET_ALL + " WHERE {0}={1} ";
+        const string C_SQL_INSERT = "INSERT INTO {0} ({1}) OUTPUT INSERTED.{2} VALUES {3}";
+        const string C_SQL_DELETE = "DELETE FROM {0} WHERE {1} = {2}";
+        const string C_SQL_UPDATE = "UPDATE {0} SET {1} WHERE {2} = {3}";
+
+
         /*
         const string COLUMNS = "CategoryName, Description";
         const string SQL_GET_ALL = @"SELECT CategoryID, " + COLUMNS + " FROM Categories";
@@ -37,6 +41,7 @@ namespace SqlReflect
             Type type = tableAttribute.GetType();*/
 
             TableAttribute att = (TableAttribute)klass.GetCustomAttribute(typeof(TableAttribute), false);
+            tableName = att.Name;
             List<string> propertyList = new List<string>();
 
             foreach (var p in klass.GetProperties())
@@ -45,13 +50,16 @@ namespace SqlReflect
                 MethodInfo pSet = p.GetSetMethod();
                 PKAttribute pk = (PKAttribute)p.GetCustomAttribute(typeof(PKAttribute));
                 ID = pk != null ? p.Name : ID;
+                
                 propertyList.Add(p.Name);
                 /*object setParam = dr[p.Name];
 
                 pSet.Invoke(item, new object[1] { setParam });*/
             }
             COLUMNN = string.Join(",", propertyList);
-            SQL_GET_ALL = @"SELECT CategoryID, " + COLUMNN + " FROM " + att.Name;
+            SQL_GET_ALL = String.Format("SELECT {0}, {1} FROM {2} ", ID, COLUMNN, tableName);
+            SQL_GET_BY_ID = String.Format(SQL_GET_ALL + " WHERE CategoryID={0} ", ID);
+            SQL_INSERT = 
             //array.ToString();
 
 
