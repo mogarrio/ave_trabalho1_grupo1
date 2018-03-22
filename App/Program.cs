@@ -41,6 +41,7 @@ namespace App
                 while (dr3.Read())
                     Console.WriteLine(dr3["RegionID"] + ", " + dr3["RegionDescription"] + "-----");
                 dr3.Close();
+
             }
             finally
             {

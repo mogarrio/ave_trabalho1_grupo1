@@ -11,7 +11,12 @@ namespace SqlReflect
     {
         private Type klass;
 
-        const string COLUMNN = "";//TODO como fazemos isto? o const nao funciona. propriedades normais?
+        private string COLUMNN;
+        private string SQL_GET_BY_ID;
+        private string SQL_INSERT;
+        private string SQL_DELETE;
+        private string SQL_UPDATE;
+        private string ID;
         /*
         const string COLUMNS = "CategoryName, Description";
         const string SQL_GET_ALL = @"SELECT CategoryID, " + COLUMNS + " FROM Categories";
@@ -26,44 +31,53 @@ namespace SqlReflect
             this.klass = klass;
 
 
-            var memberInfo = klass.GetField("State");
+            //var memberInfo = klass.GetField("State");
 
-            SqlReflect.Attributes.TableAttribute tableAttribute = new TableAttribute("Table");
-            Type type = tableAttribute.GetType();
+            /*SqlReflect.Attributes.TableAttribute tableAttribute = new TableAttribute("Table");
+            Type type = tableAttribute.GetType();*/
 
-            TableAttribute att = (TableAttribute)klass.GetCustomAttribute(typeof(TableAttribute), false);//TODO sintaxe errada? devolve a+enas 1 atributo?
-            
-            
-            
-            
-            
+            TableAttribute att = (TableAttribute)klass.GetCustomAttribute(typeof(TableAttribute), false);
+            List<string> propertyList = new List<string>();
+
+            foreach (var p in klass.GetProperties())
+            {
+
+                MethodInfo pSet = p.GetSetMethod();
+                PKAttribute pk = (PKAttribute)p.GetCustomAttribute(typeof(PKAttribute));
+                ID = pk != null ? p.Name : ID;
+                propertyList.Add(p.Name);
+                /*object setParam = dr[p.Name];
+
+                pSet.Invoke(item, new object[1] { setParam });*/
+            }
+            COLUMNN = string.Join(",", propertyList);
+            SQL_GET_ALL = @"SELECT CategoryID, " + COLUMNN + " FROM " + att.Name;
+            //array.ToString();
+
+
             /*
             object[] atts = klass.GetCustomAttributes(false);
             foreach (var att in atts)
             {
-                Type aType = att.GetType();
-                /*string attName = aType.Name;
-                if(attName == "TableAttribute")
-                {
+            Type aType = att.GetType();
+            /*string attName = aType.Name;
+            if(attName == "TableAttribute")
+            {
 
-                }
-           }*/
+            }
+            }*/
         }
 
         protected override object Load(SqlDataReader dr)
         {
             object item = Activator.CreateInstance(klass);
 
-           
-
             foreach (var p in klass.GetProperties())
             {
                 MethodInfo pSet = p.GetSetMethod();
-                Type pType= p.PropertyType;
-                object setParam = dr[p.Name]; //TODO como se faz o casting?
-                object[] paramArray = (object[])Array.CreateInstance(pType, 1);
-                paramArray[0] = setParam;
-                pSet.Invoke(item, paramArray);//TODO existe uma maneira de fazer isto enviando apenas 1 parametro
+
+                object setParam = dr[p.Name];
+
                 pSet.Invoke(item, new object[1] { setParam });
             }
             return item;
