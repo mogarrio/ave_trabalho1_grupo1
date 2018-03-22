@@ -50,12 +50,14 @@ namespace SqlReflectTest
             {
                 RegionDescription = "Central",
             };
+            Console.WriteLine("ORIGINAL1: " + c.RegionDescription + "-----" + c.RegionID);
             object id = regions.Insert(c);
             //
             // Get the new category object from database
             //
             Region actual = (Region)regions.GetById(id);
             string trimmedResult = actual.RegionDescription.Trim();
+            trimmedResult = Regex.Replace(trimmedResult, @"\t|\n|\r", "");
             Assert.AreEqual(c.RegionDescription, trimmedResult);
             //
             // Delete the created category from database
@@ -64,6 +66,7 @@ namespace SqlReflectTest
             object res = regions.GetById(id);
             actual = res != null ? (Region)res : default(Region);
             trimmedResult = actual.RegionDescription.Trim();
+            trimmedResult = Regex.Replace(trimmedResult, @"\t|\n|\r", "");
             Assert.IsNull(trimmedResult);
         }
 
@@ -78,11 +81,15 @@ namespace SqlReflectTest
             regions.Update(modified);
             Region actual = (Region)regions.GetById(3);
             string trimmedResult = actual.RegionDescription.Trim();
+            trimmedResult = Regex.Replace(trimmedResult, @"\t|\n|\r", "");
+            
             Assert.AreEqual(modified.RegionDescription, trimmedResult);
             regions.Update(original);
             actual = (Region)regions.GetById(3);
             trimmedResult = actual.RegionDescription.Trim();
-            Assert.AreEqual("Northern", actual.RegionDescription);
+            trimmedResult = Regex.Replace(trimmedResult, @"\t|\n|\r", "");
+            
+            Assert.AreEqual("Northern", trimmedResult);
         }
     }
 }

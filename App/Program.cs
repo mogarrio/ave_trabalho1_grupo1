@@ -26,12 +26,21 @@ namespace App
                 while (dr.Read())
                     Console.WriteLine(dr["ProductName"]);*/
 
+                
                 SqlCommand cmd2 = con.CreateCommand();
-                cmd2.CommandText = "SELECT RegionID, RegionDescription FROM Region";
+                cmd2.CommandText = "INSERT INTO Region(" + "RegionDescription" + ") OUTPUT INSERTED.RegionID VALUES " + "('Central')";
                 con.Open();
-                SqlDataReader dr2 = cmd2.ExecuteReader();
-                while (dr2.Read())
-                    Console.WriteLine(dr2["RegionID"] + ", " + dr2["RegionDescription"] + "-----");
+                int i = cmd2.ExecuteNonQuery();
+                Console.WriteLine(i);
+
+
+                SqlCommand cmd3 = con.CreateCommand();
+                cmd3.CommandText = "SELECT RegionID, RegionDescription FROM Region";
+                //con.Open();
+                SqlDataReader dr3 = cmd3.ExecuteReader();
+                while (dr3.Read())
+                    Console.WriteLine(dr3["RegionID"] + ", " + dr3["RegionDescription"] + "-----");
+                dr3.Close();
             }
             finally
             {

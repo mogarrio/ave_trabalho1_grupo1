@@ -11,7 +11,7 @@ namespace SqlReflect
     {
         private Type klass;
 
-        const string COLUMNN;//TODO como fazemos isto? o const nao funciona. propriedades normais?
+        const string COLUMNN = "";//TODO como fazemos isto? o const nao funciona. propriedades normais?
         /*
         const string COLUMNS = "CategoryName, Description";
         const string SQL_GET_ALL = @"SELECT CategoryID, " + COLUMNS + " FROM Categories";
