@@ -47,7 +47,7 @@ namespace SqlReflect
             foreach (var p in klass.GetProperties())
             {
 
-                MethodInfo pSet = p.GetSetMethod();
+               // MethodInfo pSet = p.GetSetMethod();
                 PKAttribute pk = (PKAttribute)p.GetCustomAttribute(typeof(PKAttribute));
                 ID = pk != null ? p.Name : ID;
                 
@@ -57,9 +57,9 @@ namespace SqlReflect
                 pSet.Invoke(item, new object[1] { setParam });*/
             }
             COLUMNN = string.Join(",", propertyList);
-            SQL_GET_ALL = String.Format("SELECT {0}, {1} FROM {2} ", ID, COLUMNN, tableName);
-            SQL_GET_BY_ID = String.Format(SQL_GET_ALL + " WHERE CategoryID={0} ", ID);
-            SQL_INSERT = 
+            string SQL_GET_ALL = String.Format(C_SQL_GET_ALL, ID, COLUMNN, tableName);
+            string SQL_GET_BY_ID = String.Format(C_SQL_GET_BY_ID, ID,new int());
+            string SQL_INSERT = "";
             //array.ToString();
 
 
