@@ -15,8 +15,8 @@ namespace SqlReflect
         private string ID;
         private string COLUMNN;
         const string C_SQL_GET_ALL = "SELECT {0}, {1} FROM {2} ";
-        const string C_SQL_GET_BY_ID = C_SQL_GET_ALL + " WHERE {0}={1} ";
-        const string C_SQL_INSERT = "INSERT INTO {0} ({1}) OUTPUT INSERTED.{2} VALUES {3}";
+        const string C_SQL_GET_BY_ID = C_SQL_GET_ALL + " WHERE {3}={4} ";
+        const string C_SQL_INSERT = "INSERT INTO {0} ({1}) OUTPUT INSERTED.{2} VALUES ({3})";
         const string C_SQL_DELETE = "DELETE FROM {0} WHERE {1} = {2}";
         const string C_SQL_UPDATE = "UPDATE {0} SET {1} WHERE {2} = {3}";
 
@@ -46,13 +46,22 @@ namespace SqlReflect
 
             foreach (var p in klass.GetProperties())
             {
-
+                string propertyName = p.Name;
                 // MethodInfo pSet = p.GetSetMethod();
                 PKAttribute pk = (PKAttribute)p.GetCustomAttribute(typeof(PKAttribute));
 
                 if (pk == null)
                 {
-                    propertyList.Add(p.Name);
+                    Type propertyType = p.PropertyType;
+                    foreach (var property in propertyType.GetProperties())
+                    {
+                        PKAttribute propertyPk = (PKAttribute)property.GetCustomAttribute(typeof(PKAttribute));
+                        if (propertyPk != null)
+                        {
+                            propertyName = property.Name;
+                        }
+                    }
+                    propertyList.Add(propertyName);
 
                 }
                 else
@@ -107,7 +116,7 @@ namespace SqlReflect
 
         protected override string SqlGetById(object id)
         {
-            string SQL_GET_BY_ID = String.Format(C_SQL_GET_BY_ID, ID, id);
+            string SQL_GET_BY_ID = String.Format(C_SQL_GET_BY_ID, ID, COLUMNN, tableName,ID, id);
             return SQL_GET_BY_ID;
         }
 
@@ -121,7 +130,8 @@ namespace SqlReflect
                 if (p.Name != ID)
                 {
                     object propertyValue = pGet.Invoke(target, null);
-                    values.Add((string)propertyValue);
+                    string valueString = "'" + (string)propertyValue + "'";
+                    values.Add(valueString);
                 }
             }
             string sqlValues = string.Join(",", values);
@@ -139,7 +149,7 @@ namespace SqlReflect
 
                 if (p.Name == ID)
                 {
-                    idValue = (string)pGet.Invoke(target, null);
+                    idValue = (pGet.Invoke(target, null).ToString());
                 }
             }
 
@@ -157,17 +167,20 @@ namespace SqlReflect
 
                 if (p.Name == ID)
                 {
-                    idValue = (string)pGet.Invoke(target, null);
+                    idValue = pGet.Invoke(target, null).ToString();
                 }
                 else
                 {
-                    object propertyValue = pGet.Invoke(target,null);
-                    string sqlValueQuery = p.Name + " = " + (string)propertyValue;
+                    object propertyValue = pGet.Invoke(target, null);
+                    string sqlValueQuery = p.Name + " = '" + (string)propertyValue + "'";
 
                     valuesToInsert.Add(sqlValueQuery);
                 }
             }
-            string SQL_UPDATE = String.Format(C_SQL_UPDATE, tableName,valuesToInsert,ID,idValue);
+            string sqlValuesToInsert = string.Join(",", valuesToInsert);
+
+            string SQL_UPDATE = String.Format(C_SQL_UPDATE, tableName, sqlValuesToInsert, ID, idValue);
+            Console.WriteLine(SQL_UPDATE);
             return SQL_UPDATE;
         }
     }
