@@ -6,6 +6,7 @@ namespace SqlReflectTest.Model
     public struct Region
     {
         [PK]
+        [NotIdentity]
         public int RegionID { get; set; }
         public string RegionDescription { get; set; }
     }
