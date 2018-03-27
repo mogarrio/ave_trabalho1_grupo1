@@ -33,13 +33,9 @@ namespace SqlReflect
         public ReflectDataMapper(Type klass, string connStr) : base(connStr)
         {
             this.klass = klass;
-
-
             //var memberInfo = klass.GetField("State");
-
             /*SqlReflect.Attributes.TableAttribute tableAttribute = new TableAttribute("Table");
             Type type = tableAttribute.GetType();*/
-
             TableAttribute att = (TableAttribute)klass.GetCustomAttribute(typeof(TableAttribute), false);
             tableName = att.Name;
             List<string> propertyList = new List<string>();
@@ -62,34 +58,14 @@ namespace SqlReflect
                         }
                     }
                     propertyList.Add(propertyName);
-
                 }
                 else
                 {
                     ID = p.Name;
                 }
-                /*object setParam = dr[p.Name];
-
-                pSet.Invoke(item, new object[1] { setParam });*/
             }
             COLUMNN = string.Join(",", propertyList);
 
-
-
-            //array.ToString();
-
-
-            /*
-            object[] atts = klass.GetCustomAttributes(false);
-            foreach (var att in atts)
-            {
-            Type aType = att.GetType();
-            /*string attName = aType.Name;
-            if(attName == "TableAttribute")
-            {
-
-            }
-            }*/
         }
 
         protected override object Load(SqlDataReader dr)
@@ -98,11 +74,35 @@ namespace SqlReflect
 
             foreach (var p in klass.GetProperties())
             {
-                MethodInfo pSet = p.GetSetMethod();
+                Type propertyType = p.PropertyType;
+                object setParam;
 
-                object setParam = dr[p.Name];
-
-                pSet.Invoke(item, new object[1] { setParam });
+                if (!propertyType.IsPrimitive && propertyType != typeof(string))
+                {
+                    string connStr = this.connStr;
+                    ReflectDataMapper reflectDataMapper = new ReflectDataMapper(propertyType, connStr);
+                    setParam = reflectDataMapper.GetById(dr[reflectDataMapper.ID].ToString());
+                }
+                else
+                {
+                    setParam = dr[p.Name];
+                }
+                if (setParam.GetType() == typeof(DBNull))
+                {
+                    if (propertyType.IsPrimitive)
+                    {
+                        setParam = 0;
+                    }
+                    else if (propertyType == typeof(string))
+                    {
+                        setParam = "";
+                    }
+                    else
+                    {
+                        setParam = new object();//TODO isto nao deve estar bem
+                    }
+                }
+                p.SetValue(item, setParam);
             }
             return item;
         }
@@ -130,7 +130,29 @@ namespace SqlReflect
                 if (p.Name != ID)
                 {
                     object propertyValue = pGet.Invoke(target, null);
-                    string valueString = "'" + (string)propertyValue + "'";
+                    Type propertyType = p.PropertyType;
+                    string valueString = "";
+                    if (propertyType.IsPrimitive)
+                    {
+                        valueString = propertyValue.ToString();
+                    }
+                    else if (propertyType == typeof(string))
+                    {
+                        valueString = "'" + (string)propertyValue + "'";
+                    }
+                    else
+                    {
+                        foreach (var property in propertyType.GetProperties())
+                        {
+                            PKAttribute propertyPk = (PKAttribute)property.GetCustomAttribute(typeof(PKAttribute));
+                            if (propertyPk != null)
+                            {
+                                MethodInfo pGetProperty = property.GetGetMethod();
+                                object objectPropertyValue = pGetProperty.Invoke(propertyValue, null);
+                                valueString = objectPropertyValue.ToString();//assumindo que os IDS são sempre ints
+                            }
+                        }
+                    }
                     values.Add(valueString);
                 }
             }

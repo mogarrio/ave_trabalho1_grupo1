@@ -8,7 +8,7 @@ namespace SqlReflect
 {
     public abstract class AbstractDataMapper : IDataMapper
     {
-        readonly string connStr;
+        protected readonly string connStr;
 
         public AbstractDataMapper(string connStr)
         {
@@ -26,6 +26,7 @@ namespace SqlReflect
         public object GetById(object id)
         {
             string sql = SqlGetById(id);
+            Console.WriteLine("test: " + sql);
             IEnumerator iter = Get(sql).GetEnumerator();
             return iter.MoveNext() ? iter.Current : null;
         }
