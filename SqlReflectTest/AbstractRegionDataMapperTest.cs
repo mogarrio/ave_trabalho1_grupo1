@@ -52,7 +52,6 @@ namespace SqlReflectTest
                 RegionID = 17,
                 RegionDescription = "Central",
             };
-            Console.WriteLine("ORIGINAL1: " + c.RegionDescription + "-----" + c.RegionID);
             object id = regions.Insert(c);
             //
             // Get the new Region object from database

@@ -26,7 +26,6 @@ namespace SqlReflect
         public object GetById(object id)
         {
             string sql = SqlGetById(id);
-            Console.WriteLine(sql);
             IEnumerator iter = Get(sql).GetEnumerator();
             return iter.MoveNext() ? iter.Current : null;
         }
@@ -62,7 +61,6 @@ namespace SqlReflect
         public object Insert(object target)
         {
             string sql = SqlInsert(target);
-            Console.WriteLine(sql);
             return Execute(sql);
         }
 
