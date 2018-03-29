@@ -44,30 +44,32 @@ namespace SqlReflectTest
         public void TestRegionInsertAndDelete()
         {
             //
-            // Create and Insert new Category
+            // Create and Insert new Region
             // 
             Region c = new Region()
             {
                 RegionDescription = "Central",
+                RegionID = 17,
             };
             Console.WriteLine("ORIGINAL1: " + c.RegionDescription + "-----" + c.RegionID);
             object id = regions.Insert(c);
             //
-            // Get the new category object from database
+            // Get the new Region object from database
             //
             Region actual = (Region)regions.GetById(id);
-            string trimmedResult = actual.RegionDescription.Trim();
+            string regionDescription = actual.RegionDescription;
+            string trimmedResult = regionDescription.Trim();
             trimmedResult = Regex.Replace(trimmedResult, @"\t|\n|\r", "");
             Assert.AreEqual(c.RegionDescription, trimmedResult);
             //
-            // Delete the created category from database
+            // Delete the created Region from database
             //
             regions.Delete(actual);
             object res = regions.GetById(id);
             actual = res != null ? (Region)res : default(Region);
-            trimmedResult = actual.RegionDescription.Trim();
-            trimmedResult = Regex.Replace(trimmedResult, @"\t|\n|\r", "");
-            Assert.IsNull(trimmedResult);
+           // trimmedResult = actual.RegionDescription.Trim();
+            //trimmedResult = Regex.Replace(trimmedResult, @"\t|\n|\r", "");
+            Assert.IsNull(res);
         }
 
         public void TestRegionUpdate()

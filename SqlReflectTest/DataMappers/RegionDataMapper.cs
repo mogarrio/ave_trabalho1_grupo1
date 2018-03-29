@@ -7,7 +7,7 @@ namespace SqlReflectTest.DataMappers
 {
     class RegionDataMapper : AbstractDataMapper
     {
-        const string COLUMNS = "RegionDescription";
+        const string COLUMNS = "RegionDescription, RegionID";
         const string SQL_GET_ALL = @"SELECT RegionID, " + COLUMNS + " FROM Region";
         const string SQL_GET_BY_ID = SQL_GET_ALL + " WHERE RegionID=";
         const string SQL_INSERT = "INSERT INTO Region (" + COLUMNS + ") OUTPUT INSERTED.RegionID VALUES ";
@@ -39,7 +39,7 @@ namespace SqlReflectTest.DataMappers
         protected override string SqlInsert(object target)
         {
             Region c = (Region)target;
-            string values = "'" + c.RegionDescription + "'";
+            string values = "'" + c.RegionDescription + "'" + ", " + c.RegionID;
             return SQL_INSERT + "(" + values + ")";
         }
 
