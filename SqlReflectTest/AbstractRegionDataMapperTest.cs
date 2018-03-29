@@ -25,6 +25,7 @@ namespace SqlReflectTest
 
         public void TestRegionGetAll()
         {
+           
             IEnumerable res = regions.GetAll();
             int count = 0;
             foreach (object p in res)
@@ -48,8 +49,8 @@ namespace SqlReflectTest
             // 
             Region c = new Region()
             {
-                RegionDescription = "Central",
                 RegionID = 17,
+                RegionDescription = "Central",
             };
             Console.WriteLine("ORIGINAL1: " + c.RegionDescription + "-----" + c.RegionID);
             object id = regions.Insert(c);
@@ -67,8 +68,7 @@ namespace SqlReflectTest
             regions.Delete(actual);
             object res = regions.GetById(id);
             actual = res != null ? (Region)res : default(Region);
-           // trimmedResult = actual.RegionDescription.Trim();
-            //trimmedResult = Regex.Replace(trimmedResult, @"\t|\n|\r", "");
+            
             Assert.IsNull(res);
         }
 
