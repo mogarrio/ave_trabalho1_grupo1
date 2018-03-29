@@ -10,20 +10,19 @@ namespace SqlReflect {
         private Type klass;
         private string tableName;
 
-       /// Dictionary<string, Propriedades> discovery;
-       /// <summary>
-       ///          classe             NomePropriedade, Cenas a guardar
-       /// Propriedades
-           /// InfoProperty    id;
-           ///                Nome;
-           ///                Get;
-           ///                Set;
-       ///
-       /// 
-       /// </summary>
-       /// 
-
-
+        private static Dictionary<string, ClassProperties> discovery = new Dictionary<string, ClassProperties>();
+        /// Dictionary<string, Propriedades> discovery;
+        /// <summary>
+        ///          classe             NomePropriedade, Cenas a guardar
+        /// Propriedades
+        /// InfoProperty    id;
+        ///                Nome;
+        ///                Get;
+        ///                Set;
+        ///
+        /// 
+        /// </summary>
+        /// 
         private string idField;
         private string COLUMNN;
         const string C_SQL_GET_ALL = "SELECT {0}, {1} FROM {2} ";
@@ -35,6 +34,7 @@ namespace SqlReflect {
 
         public ReflectDataMapper(Type klass, string connStr) : base(connStr) {
             this.klass = klass;
+            ClassProperties classproperties = new ClassProperties();
 
             TableAttribute att = (TableAttribute)klass.GetCustomAttribute(typeof(TableAttribute), false);
             tableName = att.Name;
@@ -54,13 +54,17 @@ namespace SqlReflect {
                         }
                     }
                     propertyList.Add(propertyName);
+                    classproperties.otherProperties.Add(p);
                 } else {
-            
                     idField = p.Name;
+                    classproperties.id = p;
                 }
             }
             COLUMNN = string.Join(",", propertyList);
-
+            string className = klass.Name;
+            if (!discovery.ContainsKey(className)) {
+                discovery.Add(className, classproperties);
+            }
         }
 
         protected override object Load(SqlDataReader dr) {
@@ -108,39 +112,29 @@ namespace SqlReflect {
                 string valueString = "";
 
                 if (p.Name != idField) {
-                    object propertyValue = pGet.Invoke(target, null);
                     Type propertyType = p.PropertyType;
 
                     if (propertyType.IsPrimitive) {
-
-                        valueString = propertyValue.ToString();
-
+                        valueString = getPropertyValue(p, target);
                     } else if (propertyType == typeof(string)) {
-
-                        valueString = "'" + (string)propertyValue + "'";
-
+                        valueString = "'" + getPropertyValue(p, target) + "'";
                     } else {
-  
-                        foreach (var property in propertyType.GetProperties()) {
+                        object propertyValue = pGet.Invoke(target, null);
 
-                            PKAttribute propertyPk = (PKAttribute)property.GetCustomAttribute(typeof(PKAttribute));
-
-                            if (propertyPk != null) {
-                                MethodInfo pGetProperty = property.GetGetMethod();
-                                object objectPropertyValue = pGetProperty.Invoke(propertyValue, null);
-                                valueString = objectPropertyValue.ToString();
-                            }
-                        }
+                        string className = propertyType.Name;
+                        ClassProperties classProperties = new ClassProperties();
+                        if (discovery.TryGetValue(className, out classProperties)) {
+                            PropertyInfo classId = classProperties.id;
+                            valueString = getPropertyValue(classId, propertyValue);
+                        } 
                     }
                     values.Add(valueString);
                 } else {
                     NotIdentity pNotIdentity = (NotIdentity)p.GetCustomAttribute(typeof(NotIdentity));
                     if (pNotIdentity != null) {
-                        MethodInfo pGetProperty = p.GetGetMethod();
-                        object objectPropertyValue = pGetProperty.Invoke(target, null);
-                        valueString = objectPropertyValue.ToString();
+                        valueString = getPropertyValue(p, target);
                         values.Add(valueString);
-                        columnsToInsert = idField + ", " + columnsToInsert;
+                        columnsToInsert = idField + ", " + columnsToInsert; //assuming the ID if the first property
                     }
                 }
             }
@@ -151,14 +145,12 @@ namespace SqlReflect {
 
         protected override string SqlDelete(object target) {
             string idValue = "";
-            foreach (var p in klass.GetProperties()) {
-                MethodInfo pGet = p.GetGetMethod();
-
-                if (p.Name == idField) {
-                    idValue = (pGet.Invoke(target, null).ToString());
-                }
+            string className = klass.Name;
+            ClassProperties classProperties = new ClassProperties();
+            if (discovery.TryGetValue(className, out classProperties)) {
+                PropertyInfo classId = classProperties.id;
+                idValue = getPropertyValue(classId, target);
             }
-
             string SQL_DELETE = String.Format(C_SQL_DELETE, tableName, idField, idValue);
             return SQL_DELETE;
         }
@@ -167,13 +159,11 @@ namespace SqlReflect {
             List<string> valuesToInsert = new List<string>();
             string idValue = "";
             foreach (var p in klass.GetProperties()) {
-                MethodInfo pGet = p.GetGetMethod();
-
                 if (p.Name == idField) {
-                    idValue = pGet.Invoke(target, null).ToString();
+                    idValue = getPropertyValue(p, target);
                 } else {
-                    object propertyValue = pGet.Invoke(target, null);
-                    string sqlValueQuery = p.Name + " = '" + (string)propertyValue + "'";
+                    string valueString = getPropertyValue(p, target);
+                    string sqlValueQuery = p.Name + " = '" + valueString + "'";
 
                     valuesToInsert.Add(sqlValueQuery);
                 }
@@ -181,8 +171,19 @@ namespace SqlReflect {
             string sqlValuesToInsert = string.Join(",", valuesToInsert);
 
             string SQL_UPDATE = String.Format(C_SQL_UPDATE, tableName, sqlValuesToInsert, idField, idValue);
-            Console.WriteLine(SQL_UPDATE);
             return SQL_UPDATE;
+        }
+
+        private static string getPropertyValue(PropertyInfo property, object target) {
+            MethodInfo getMethod = property.GetGetMethod();
+            object objectPropertyValue = getMethod.Invoke(target, null);
+            string result = objectPropertyValue.ToString();
+            return result;
+        }
+
+        private class ClassProperties {
+            public PropertyInfo id;
+            public List<PropertyInfo> otherProperties = new List<PropertyInfo>();
         }
     }
 }

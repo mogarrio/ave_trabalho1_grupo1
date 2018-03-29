@@ -26,7 +26,7 @@ namespace SqlReflect
         public object GetById(object id)
         {
             string sql = SqlGetById(id);
-            Console.WriteLine("test: " + sql);
+            Console.WriteLine(sql);
             IEnumerator iter = Get(sql).GetEnumerator();
             return iter.MoveNext() ? iter.Current : null;
         }
