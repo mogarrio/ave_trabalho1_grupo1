@@ -53,6 +53,7 @@
     <Compile Include="AbstractProductDataMapperTest.cs" />
     <Compile Include="AbstractRegionDataMapperTest.cs" />
     <Compile Include="CategoryDataMapperReflectTest.cs" />
+    <Compile Include="RegionDataMapperReflectTest.cs" />
     <Compile Include="RegionDataMapperTest.cs" />
     <Compile Include="DataMappers\RegionDataMapper.cs" />
     <Compile Include="DataMappers\SupplierDataMapper.cs" />

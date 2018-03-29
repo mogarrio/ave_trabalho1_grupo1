@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SqlReflect.Attributes
 {
-    public class NotIdentity : Attribute
+    public class NotIdentity : PKAttribute
     {
     }
 }

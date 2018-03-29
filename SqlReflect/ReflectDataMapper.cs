@@ -10,6 +10,20 @@ namespace SqlReflect {
         private Type klass;
         private string tableName;
 
+       /// Dictionary<string, Propriedades> discovery;
+       /// <summary>
+       ///          classe             NomePropriedade, Cenas a guardar
+       /// Propriedades
+           /// InfoProperty    id;
+           ///                Nome;
+           ///                Get;
+           ///                Set;
+       ///
+       /// 
+       /// </summary>
+       /// 
+
+
         private string idField;
         private string COLUMNN;
         const string C_SQL_GET_ALL = "SELECT {0}, {1} FROM {2} ";
@@ -106,7 +120,7 @@ namespace SqlReflect {
                         valueString = "'" + (string)propertyValue + "'";
 
                     } else {
-
+  
                         foreach (var property in propertyType.GetProperties()) {
 
                             PKAttribute propertyPk = (PKAttribute)property.GetCustomAttribute(typeof(PKAttribute));
@@ -123,7 +137,7 @@ namespace SqlReflect {
                     NotIdentity pNotIdentity = (NotIdentity)p.GetCustomAttribute(typeof(NotIdentity));
                     if (pNotIdentity != null) {
                         MethodInfo pGetProperty = p.GetGetMethod();
-                        object objectPropertyValue = pGetProperty.Invoke(p, null);
+                        object objectPropertyValue = pGetProperty.Invoke(target, null);
                         valueString = objectPropertyValue.ToString();
                         values.Add(valueString);
                         columnsToInsert = idField + ", " + columnsToInsert;
