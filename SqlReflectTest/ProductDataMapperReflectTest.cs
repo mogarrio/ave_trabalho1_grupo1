@@ -17,7 +17,9 @@ namespace SqlReflectTest
         [TestMethod]
         public void TestProductGetAllReflect()
         {
-            base.TestProductGetAll();
+            for (int i = 0; i < 100; i++) {
+                base.TestProductGetAll();
+            }
         }
 
         [TestMethod]

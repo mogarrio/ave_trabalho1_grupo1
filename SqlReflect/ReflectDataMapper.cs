@@ -9,6 +9,7 @@ namespace SqlReflect {
     public class ReflectDataMapper : AbstractDataMapper {
         private Type klass;
         private string tableName;
+        //Dictionary should have stored instances of ReflectDataMapper
         private static Dictionary<string, ClassProperties> discovery = new Dictionary<string, ClassProperties>();
 
         private string idField;
@@ -34,7 +35,7 @@ namespace SqlReflect {
 
                 if (pk == null) {
                     Type propertyType = p.PropertyType;
-                    foreach (var property in propertyType.GetProperties()) {
+                    foreach (var property in propertyType.GetProperties()) {//There should be an if to only iterate through non primitive nd string properties
                         PKAttribute propertyPk = (PKAttribute)property.GetCustomAttribute(typeof(PKAttribute));
                         if (propertyPk != null) {
                             propertyName = property.Name;
@@ -64,6 +65,7 @@ namespace SqlReflect {
 
                 if (!propertyType.IsPrimitive && propertyType != typeof(string)) {
                     string connStr = this.connStr;
+                    //should have checked dictionary
                     ReflectDataMapper reflectDataMapper = new ReflectDataMapper(propertyType, connStr);
                     setParam = reflectDataMapper.GetById(dr[reflectDataMapper.idField].ToString());
                 }
